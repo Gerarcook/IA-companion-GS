@@ -1,0 +1,47 @@
+clawgs-wc/
+├── package.json
+├── package-lock.json
+├── pnpm-lock.yaml
+├── pnpm-workspace.yaml
+├── probe.js
+├── tsconfig.json
+├── electron.vite.config.mts
+├── .env    
+├── .env.example
+├── modelos.txt
+├── node_modules/
+├── dist/
+├── ├── main/
+│   │   ├── index.ts
+│   ├── preload/
+│   │   └── index.ts
+│   └── renderer/
+│       ├── assets/      
+│       │   ├── index-B_S5kPDU.css
+│       │   ├── iindex-DtP991Bq.js
+│       ├── index.html
+├── src/
+│   ├── main/
+│   │   ├── index.ts
+│   │   ├── window-manager.ts
+│   │   ├── openclaw-client.ts
+│   │   ├── openclaw_tts_clients.ts   
+│   │   ├── tts-providers.ts
+│   │   ├── tts-engine.ts
+│   │   ├── omniroute_client.ts
+│   │   ├── db.ts
+│   │   ├── file-permissions.ts
+│   │   └── ipc-handlers.ts
+│   ├── preload/
+│   │   └── index.ts
+│   └── renderer/
+│       ├── bubble/
+│       ├── chat/
+│       ├── image-viewer/
+│       ├── setting/
+│       ├── App.tsx
+│       ├── global.d.ts
+│       ├── index.html
+│       └── main.tsx
+└── docs/
+    └── README.md
