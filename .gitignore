@@ -1,0 +1,52 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build output
+dist/
+dist-ssr/
+*.local
+
+# Environment files (contienen API keys)
+.env
+.env.local
+.env.*.local
+
+# Database (puede contener tokens guardados)
+*.sqlite
+*.sqlite3
+*.db
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Electron cache
+.electron-vite/
+
+# Coverage
+coverage/
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Temporary files
+*.tmp
+*.temp
+temp/
+tmp/
