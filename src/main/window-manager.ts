@@ -1,11 +1,19 @@
 import { app, BrowserWindow, screen } from 'electron';
 import path from 'node:path';
+import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export function createBubbleWindow(rootPath: string): BrowserWindow {
   const isDev = !app.isPackaged && process.env.NODE_ENV !== 'production';
+
+  // Ícono de la app (logo de IA-companion-GS) si existe
+  let iconPath: string | undefined;
+  try {
+    const candidate = path.join(app.getAppPath(), 'build', 'icon.png');
+    if (existsSync(candidate)) iconPath = candidate;
+  } catch {}
 
   // Posición: abajo a la derecha
   const { width: screenWidth, height: screenHeight } = screen.getPrimaryDisplay().workAreaSize;
@@ -25,6 +33,8 @@ export function createBubbleWindow(rootPath: string): BrowserWindow {
     resizable: false,
     skipTaskbar: true,
     show: false,
+    title: 'IA-companion-GS',
+    ...(iconPath ? { icon: iconPath } : {}),
     webPreferences: {
       preload: path.join(rootPath, '..', 'preload', 'index.js'),
       contextIsolation: true,

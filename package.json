@@ -1,11 +1,12 @@
 {
-  "name": "clawgs-wc",
-  "version": "0.1.0",
-  "description": "Compañero de escritorio ClawGS-WC...",
+  "name": "ia-companion-gs",
+  "version": "0.2.0",
+  "description": "IA-companion-GS — asistente de escritorio con IA (Electron + React), compatible con cualquier proveedor OpenAI-compatible",
   "author": "Gerardo",
   "main": "dist/main/index.js",
   "scripts": {
     "preview": "electron-vite preview",
+    "start": "electron .",
     "type-check": "tsc --noEmit",
     "test": "vitest run",
     "build": "electron-vite build",

@@ -30,9 +30,17 @@ export interface AttachedFile {
   dataUrl: string;  // base64
 }
 
+export interface ChatHistoryRow {
+  id: number;
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: number;
+}
+
 const api = {
   // OpenClaw
-  connect: (token: string) => ipcRenderer.invoke('openclaw:connect', token),
+  connect: (token: string, url?: string, model?: string) =>
+    ipcRenderer.invoke('openclaw:connect', { token, url, model }),
   disconnect: () => ipcRenderer.invoke('openclaw:disconnect'),
   isConnected: () => ipcRenderer.invoke('openclaw:is-connected'),
   retry: () => ipcRenderer.invoke('openclaw:retry'),
@@ -41,6 +49,11 @@ const api = {
     const listener = (_: any, msg: OpenClawMessage) => callback(msg);
     ipcRenderer.on('openclaw:message', listener);
     return () => { ipcRenderer.off('openclaw:message', listener); };
+  },
+  onDelta: (callback: (msg: { text: string }) => void) => {
+    const listener = (_: any, msg: { text: string }) => callback(msg);
+    ipcRenderer.on('openclaw:delta', listener);
+    return () => { ipcRenderer.off('openclaw:delta', listener); };
   },
   onStatus: (callback: (status: { connected: boolean }) => void) => {
     const listener = (_: any, status: { connected: boolean }) => callback(status);
@@ -51,6 +64,12 @@ const api = {
     const listener = (_: any, err: string) => callback(err);
     ipcRenderer.on('openclaw:error', listener);
     return () => { ipcRenderer.off('openclaw:error', listener); };
+  },
+
+  // Historial persistente
+  chat: {
+    getHistory: (): Promise<ChatHistoryRow[]> => ipcRenderer.invoke('chat:get-history'),
+    clear: () => ipcRenderer.invoke('chat:clear'),
   },
 
   // TTS Providers
