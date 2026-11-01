@@ -2,7 +2,7 @@
 
 Asistente de escritorio con IA (Electron + React) para Windows: burbuja flotante siempre visible, chat con streaming, voz (TTS), dictado por voz, adjuntos multimodales y **compatibilidad con cualquier proveedor de modelos** (no depende de un único gateway).
 
-![IA-companion-GS](build/ia-logo-full.png)
+![IA-companion-GS](build/new-project.png)
 
 ## Características
 
