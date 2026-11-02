@@ -39,6 +39,7 @@ export default function ImageViewer({ src, onClose }: ImageViewerProps) {
       />
       <button
         onClick={onClose}
+        aria-label="Cerrar visor"
         style={{
           position: 'absolute',
           top: 24,

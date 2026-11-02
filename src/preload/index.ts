@@ -30,9 +30,17 @@ export interface AttachedFile {
   dataUrl: string;  // base64
 }
 
+export interface ChatHistoryRow {
+  id: number;
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: number;
+}
+
 const api = {
   // OpenClaw
-  connect: (token: string) => ipcRenderer.invoke('openclaw:connect', token),
+  connect: (token: string, url?: string, model?: string) =>
+    ipcRenderer.invoke('openclaw:connect', { token, url, model }),
   disconnect: () => ipcRenderer.invoke('openclaw:disconnect'),
   isConnected: () => ipcRenderer.invoke('openclaw:is-connected'),
   retry: () => ipcRenderer.invoke('openclaw:retry'),
@@ -42,15 +50,28 @@ const api = {
     ipcRenderer.on('openclaw:message', listener);
     return () => { ipcRenderer.off('openclaw:message', listener); };
   },
-  onStatus: (callback: (status: { connected: boolean }) => void) => {
-    const listener = (_: any, status: { connected: boolean }) => callback(status);
+  onDelta: (callback: (msg: { text: string }) => void) => {
+    const listener = (_: any, msg: { text: string }) => callback(msg);
+    ipcRenderer.on('openclaw:delta', listener);
+    return () => { ipcRenderer.off('openclaw:delta', listener); };
+  },
+  onStatus: (callback: (status: { connected: boolean; error?: string | null }) => void) => {
+    const listener = (_: any, status: { connected: boolean; error?: string | null }) => callback(status);
     ipcRenderer.on('openclaw:status', listener);
     return () => { ipcRenderer.off('openclaw:status', listener); };
   },
+  /** Motivo por el que la última verificación falló (null si está OK o no se probó). */
+  lastError: (): Promise<string | null> => ipcRenderer.invoke('openclaw:last-error'),
   onError: (callback: (err: string) => void) => {
     const listener = (_: any, err: string) => callback(err);
     ipcRenderer.on('openclaw:error', listener);
     return () => { ipcRenderer.off('openclaw:error', listener); };
+  },
+
+  // Historial persistente
+  chat: {
+    getHistory: (): Promise<ChatHistoryRow[]> => ipcRenderer.invoke('chat:get-history'),
+    clear: () => ipcRenderer.invoke('chat:clear'),
   },
 
   // TTS Providers
@@ -85,6 +106,13 @@ const api = {
     const listener = () => callback();
     ipcRenderer.on('ui:toggle-chat', listener);
     return () => { ipcRenderer.off('ui:toggle-chat', listener); };
+  },
+
+  // Ventana (burbuja ↔ chat, y tamaño ampliado)
+  window: {
+    setMode: (mode: 'bubble' | 'chat' | 'expanded') => ipcRenderer.invoke('window:set-mode', mode),
+    getMode: (): Promise<'bubble' | 'chat' | 'expanded'> => ipcRenderer.invoke('window:get-mode'),
+    setPointerOverBubble: (over: boolean) => ipcRenderer.invoke('window:pointer', over),
   },
 };
 

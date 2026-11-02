@@ -1,3 +1,4 @@
+import path from 'node:path';
 import { dialog, BrowserWindow } from 'electron';
 import { authorizePath, isPathAuthorized, listAuthorizedPaths, revokePath } from './db';
 
@@ -17,6 +18,26 @@ export class FilePermissions {
 
   isAuthorized(targetPath: string): boolean {
     return isPathAuthorized(targetPath);
+  }
+
+  /** Verifica si un archivo está dentro de alguna carpeta autorizada (o es la propia raíz). */
+  isWithinAuthorized(targetPath: string): boolean {
+    let resolved: string;
+    try {
+      resolved = path.resolve(targetPath);
+    } catch {
+      return false;
+    }
+    const resolvedLower = resolved.toLowerCase();
+    return listAuthorizedPaths().some((dir) => {
+      const dirResolved = path.resolve(dir).toLowerCase();
+      return (
+        resolvedLower === dirResolved ||
+        resolvedLower.startsWith(dirResolved + path.sep) ||
+        resolvedLower.startsWith(dirResolved + '\\') ||
+        resolvedLower.startsWith(dirResolved + '/')
+      );
+    });
   }
 
   listAuthorized(): string[] {
