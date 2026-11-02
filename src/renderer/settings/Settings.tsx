@@ -558,7 +558,7 @@ export default function Settings({ onClose }: SettingsProps) {
                         <button onClick={() => revokeFolder(f)} style={{
                           background: 'transparent', border: 'none', color: RED, cursor: 'pointer',
                           fontSize: 14, padding: '2px 6px', borderRadius: 2, fontFamily: FONT,
-                        }} title="Revocar" aria-label="Revocar carpeta">&#215;</button>
+}} title="Revocar" aria-label="Revocar carpeta">&#215;</button>
                       </li>
                     ))}
                   </ul>
@@ -602,3 +602,4 @@ export default function Settings({ onClose }: SettingsProps) {
     </>
   );
 }
+

@@ -303,6 +303,9 @@ export default function Chat({ onClose, onOpenSettings, expanded, onToggleExpand
     }
   };
 
+  const formatTime = (ts: number) =>
+    new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
   return (
     <div className={`app ${expanded ? 'expanded' : ''}`}>
       {/* HUD corner brackets */}

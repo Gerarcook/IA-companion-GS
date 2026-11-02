@@ -30,7 +30,7 @@ interface OmniConfig {
 
 /**
  * Resuelve la conexión al proveedor de modelos (cualquier endpoint compatible con OpenAI).
- * Orden: ajustes guardados en BD → LLM_* genérico → OMNIROUTE_* → OPENROUTER_* (alias) → default.
+ * Orden: ajustes guardados en BD → LLM_* genérico → OMNIROUTE_* (compatibilidad) → default.
  */
 function resolveOmniConfig(): OmniConfig {
   const url =
@@ -121,6 +121,9 @@ export function registerIpcHandlers(mainWin: BrowserWindow) {
     }
   };
 
+  // Notificar estado inicial (sin verificación)
+  setTimeout(() => sendStatus(!!resolveOmniConfig().key), 100);
+
   /** Proveedores locales que pueden funcionar sin API key (Ollama, LM Studio...). */
   const isLocalUrl = (url: string): boolean => /^(https?:\/\/)?(localhost|127\.0\.0\.1|0\.0\.0\.0|\[::1\])/i.test(url);
 
@@ -147,9 +150,6 @@ export function registerIpcHandlers(mainWin: BrowserWindow) {
       return { ok: false, error: msg };
     }
   }
-
-  // Al iniciar: verificar con la config guardada (no asumir ONLINE solo por tener key)
-  void refreshConnection();
 
   /**
    * Traduce adjuntos del renderer a contenido multimodal compatible OpenAI.
@@ -198,45 +198,22 @@ export function registerIpcHandlers(mainWin: BrowserWindow) {
 
   ipcMain.handle('openclaw:retry', async () => {
     const cfg = resolveOmniConfig();
-    if (!cfg.key && !isLocalUrl(cfg.url)) {
-      sendStatus(false, 'Sin API key configurada (⚙ › SISTEMA)');
-      return { ok: false, error: 'Sin API key configurada (⚙ › SISTEMA)' };
+    if (!cfg.key) return { ok: false, error: 'Sin API key configurada' };
+    omni.updateConfig(cfg.url, cfg.key, cfg.model);
+    try {
+      await omni.verify();
+      sendStatus(true);
+      return { ok: true };
+    } catch (err: any) {
+      const msg = String(err?.message ?? err);
+      sendStatus(false, msg);
+      console.error('[conn] Verificación fallida:', msg, '| url:', cfg.url, '| model:', cfg.model);
+      return { ok: false, error: msg };
     }
-    const result = await refreshConnection();
-    return result.ok ? { ok: true } : { ok: false, error: result.error };
   });
 
-  ipcMain.handle(
-    'openclaw:connect',
-    async (_, payload: { token: string; url?: string; model?: string } | string) => {
-      try {
-        const isObj = typeof payload === 'object' && payload !== null;
-        const token = (isObj ? payload.token : payload) ?? '';
-        const cfg = resolveOmniConfig();
-        const url = (isObj && payload.url) || cfg.url;
-        const model = (isObj && payload.model) || cfg.model;
-
-        if (!token.trim()) {
-          sendStatus(false);
-          return { ok: false, error: 'Token vacío' };
-        }
-
-        setSetting('omniroute_api_key', token);
-        if (isObj && payload.url) setSetting('omniroute_url', payload.url);
-        if (isObj && payload.model) setSetting('omniroute_model', payload.model);
-
-        omni.updateConfig(url, token, model);
-
-        // Verificación real contra el gateway
-        await omni.verify();
-        sendStatus(true);
-        return { ok: true };
-      } catch (err: any) {
-        sendStatus(false);
-        return { ok: false, error: String(err?.message ?? err) };
-      }
-    }
-  );
+  // Al iniciar: verificar con la config guardada (no asumir ONLINE solo por tener key)
+  void refreshConnection();
 
   ipcMain.handle('openclaw:disconnect', async () => {
     sendStatus(false);
